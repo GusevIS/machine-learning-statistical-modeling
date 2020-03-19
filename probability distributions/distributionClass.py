@@ -2,7 +2,10 @@ from abc import ABC
 
 import numpy as np
 from matplotlib import pylab as plt
+import seaborn as sns
 import abc
+import pandas as pd
+import seaborn as sns
 
 
 class Distribution(abc.ABC):
@@ -44,11 +47,29 @@ class Distribution(abc.ABC):
     def distribution_function(self):
         x = np.array([i for i in range(self.r_low, self.r_up + 1)])
         n = len(self.sample)
-        y = np.array([len(list(filter(lambda xi: xi <= i, self.sample))) / n for i in x])
-        plt.figure('distribution function')
+        sorted_sample = np.sort(self.sample)
+        return x, np.array([len(list(filter(lambda xi: xi <= i, sorted_sample))) / n for i in x])
+
+    def plt_distribution_function(self):
+        x, y = self.distribution_function()
         plt.ylim(0.0, 1.1)
         plt.plot(x, y, 'bo')
         plt.vlines(x, 0, ymax=y, colors='b', lw=1, alpha=0.5)
+
+    def graphic_test(self):
+        x = list(self.sample[:-1])
+        y = list(self.sample[1:])
+        n = len(x)
+        """""
+        #plt.plot(x, y, 'bo')
+        xy = pd.DataFrame({'x': x, 'y': y})
+        print(xy)
+        #dfcounts = xy.groupby(['x', 'y']).size().reset_index(name='counts')
+        color = [range(len(x))]
+        xy.plot.scatter(x="x", y="y", colormap='viridis', c=color)
+        """""
+        with sns.axes_style("white"):
+            sns.jointplot(x=x, y=y, kind="kde", color="k")
 
     def mean(self):
         return np.mean(self.sample)
