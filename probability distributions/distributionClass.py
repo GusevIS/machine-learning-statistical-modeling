@@ -50,24 +50,10 @@ class Distribution(abc.ABC):
         sorted_sample = np.sort(self.sample)
         return x, np.array([len(list(filter(lambda xi: xi <= i, sorted_sample))) / n for i in x])
 
-    def plt_distribution_function(self):
-        x, y = self.distribution_function()
-        plt.ylim(0.0, 1.1)
-        plt.plot(x, y, 'bo')
-        plt.vlines(x, 0, ymax=y, colors='b', lw=1, alpha=0.5)
-
     def graphic_test(self):
         x = list(self.sample[:-1])
         y = list(self.sample[1:])
         n = len(x)
-        """""
-        #plt.plot(x, y, 'bo')
-        xy = pd.DataFrame({'x': x, 'y': y})
-        print(xy)
-        #dfcounts = xy.groupby(['x', 'y']).size().reset_index(name='counts')
-        color = [range(len(x))]
-        xy.plot.scatter(x="x", y="y", colormap='viridis', c=color)
-        """""
         with sns.axes_style("white"):
             sns.jointplot(x=x, y=y, kind="kde", color="k")
 
@@ -81,14 +67,6 @@ class Distribution(abc.ABC):
         if self.r_up <= x:
             self.r_up = x
 
-    @abc.abstractmethod
-    def theoretical_probability(self):
-        pass
-
-    @abc.abstractmethod
-    def probability(self):
-        pass
-
 
 class DiscreteDistribution(Distribution, ABC):
     def probability(self):
@@ -98,3 +76,32 @@ class DiscreteDistribution(Distribution, ABC):
         plt.ylim(0.0, 1.0)
         plt.plot(x, y, 'ro')
         plt.vlines(x, 0, ymax=y, colors='r', lw=1, alpha=0.5)
+
+    def plt_distribution_function(self):
+        x, y = self.distribution_function()
+        plt.ylim(0.0, 1.1)
+        plt.plot(x, y, 'bo')
+        plt.vlines(x, 0, ymax=y, colors='b', lw=1, alpha=0.5)
+
+    @abc.abstractmethod
+    def theoretical_probability(self):
+        pass
+
+
+class ContinuousDistribution(Distribution, ABC):
+    def pdf(self):
+        self.sample.plot.kde(lw=3, color='b', ylim=(0, 1), xlim=(self.r_low, self.r_up))
+
+    def distribution_function(self):
+        x = np.sort(self.sample)
+        n = len(x)
+        return x, np.array([len(list(filter(lambda xi: xi <= i, x))) / n for i in x])
+
+    def plt_distribution_function(self):
+        x, y = self.distribution_function()
+        plt.ylim(0.0, 1.1)
+        plt.plot(x, y, 'b-')
+
+    @abc.abstractmethod
+    def theoretical_pdf(self):
+        pass
